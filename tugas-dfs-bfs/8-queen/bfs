@@ -1,0 +1,48 @@
+# N Queen
+import time
+
+numQueens = 8  # jumlah row queen yagn akan diselesaikan
+
+currentSolution = [0 for x in range(numQueens)]  # akan mengetest jumlah N X N
+solutions = []  # output solusi
+
+
+def isSafe(testRow, testCol):
+    # tidak perlu mengecek row 0
+    if testRow == 0:
+        return True
+
+    for row in range(0, testRow):
+
+        # mengecek vertikal
+        if testCol == currentSolution[row]:
+            return False
+
+        # mengecek diagonal
+        if abs(testRow - row) == abs(testCol - currentSolution[row]):
+            return False
+
+    # tidak menemukan
+    return True
+
+def placeQueen(row):
+    global currentSolution, solutions, numQueens
+
+    for col in range(numQueens):
+        if not isSafe(row, col):
+            continue
+        else:
+            currentSolution[row] = col
+            if row == (numQueens - 1):
+                #  baris terakhir
+                solutions.append(currentSolution.copy())
+                print( "Solution number ", len( solutions ), currentSolution )
+            else:
+                placeQueen(row + 1)
+
+print("Solving for " + str(numQueens) + " Queens")
+
+time.sleep(2)
+placeQueen(0)
+
+print(len(solutions), " solutions found")
