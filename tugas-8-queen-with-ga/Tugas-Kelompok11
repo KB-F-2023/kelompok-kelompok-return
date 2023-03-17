@@ -1,0 +1,88 @@
+import random
+
+# Define constants
+BOARD_SIZE = 8
+POPULATION_SIZE = 100
+MUTATION_RATE = 0.1
+GENERATIONS = 1000
+
+# Define the fitness function
+def fitness(board):
+    # Calculate number of conflicts
+    conflicts = 0
+    for i in range(BOARD_SIZE):
+        for j in range(i + 1, BOARD_SIZE):
+            if board[i] == board[j] or \
+               board[i] + i == board[j] + j or \
+               board[i] - i == board[j] - j:
+                conflicts += 1
+    return BOARD_SIZE * (BOARD_SIZE - 1) // 2 - conflicts
+
+# Define the crossover function
+def crossover(parent1, parent2):
+    # Select a random crossover point
+    crossover_point = random.randint(1, BOARD_SIZE - 1)
+    # Create child board
+    child = parent1[:crossover_point] + parent2[crossover_point:]
+    # Resolve conflicts in child board
+    while len(set(child)) != BOARD_SIZE:
+        for i in range(BOARD_SIZE):
+            if child.count(child[i]) > 1:
+                for j in range(BOARD_SIZE):
+                    if child.count(j) == 0:
+                        child[i] = j
+                        break
+    return child
+
+# Define the mutation function
+def mutate(board):
+    # Perform mutation with probability MUTATION_RATE
+    if random.random() < MUTATION_RATE:
+        # Select a random index to mutate
+        index = random.randint(0, BOARD_SIZE - 1)
+        # Mutate the index
+        board[index] = random.randint(0, BOARD_SIZE - 1)
+    return board
+
+# Define the create initial population function
+def create_population():
+    # Create a random population of size POPULATION_SIZE
+    population = []
+    for i in range(POPULATION_SIZE):
+        board = list(range(BOARD_SIZE))
+        random.shuffle(board)
+        population.append(board)
+    return population
+
+# Define the main function to solve the problem
+def solve():
+    # Create initial population
+    population = create_population()
+    # Evolution loop
+    for i in range(GENERATIONS):
+        # Calculate fitness scores for population
+        fitness_scores = [(board, fitness(board)) for board in population]
+        fitness_scores.sort(key=lambda x: x[1], reverse=True)
+        # Check if solution is found
+        if fitness_scores[0][1] == BOARD_SIZE * (BOARD_SIZE - 1) // 2:
+            return fitness_scores[0][0]
+        # Select parents for crossover
+        parents = fitness_scores[:POPULATION_SIZE // 2]
+        # Create new population using crossover and mutation
+        new_population = []
+        for j in range(POPULATION_SIZE // 2):
+            parent1 = random.choice(parents)[0]
+            parent2 = random.choice(parents)[0]
+            child = crossover(parent1, parent2)
+            child = mutate(child)
+            new_population.append(child)
+        population = new_population
+    # Solution not found
+    return None
+
+# Test the algorithm
+solution = solve()
+if solution is not None:
+    print("Solution:", solution)
+else:
+    print("No solution found.")
